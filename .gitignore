@@ -1,4 +1,5 @@
 CMakeLists.txt.user
+CMakeLists.txt
 CMakeCache.txt
 CMakeFiles
 CMakeScripts
@@ -10,3 +11,5 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 build/
+pico_MFRC522.c
+.vscode/
