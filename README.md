@@ -1,4 +1,4 @@
-Pico C/C++ sdk library for MFRC522.
+Pico C/C++ SDK library for MFRC522.
 
 Tested with this RC522 module: https://www.az-delivery.de/en/products/rfid-set. 
 

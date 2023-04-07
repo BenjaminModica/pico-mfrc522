@@ -33,12 +33,6 @@ MFRC522Ptr_t MFRC522_Init() {
 
 	mfrc_Instances[MFRC_Instance_Counter]._chipSelectPin = cs_pin;
 
-	// assign values
-	// dataSetup_Instances[MFRC_Instance_Counter].length = BUFFER_SIZE;
-	// dataSetup_Instances[MFRC_Instance_Counter].rx_data = mfrc_Instances[MFRC_Instance_Counter].Rx_Buf;
-	// dataSetup_Instances[MFRC_Instance_Counter].tx_data = mfrc_Instances[MFRC_Instance_Counter].Tx_Buf;
-	// mfrc_Instances[MFRC_Instance_Counter].data_Setup = dataSetup_Instances[MFRC_Instance_Counter];
-
 	// update instance counter
 	MFRC_Instance_Counter++;
 
@@ -50,44 +44,6 @@ MFRC522Ptr_t MFRC522_Init() {
 /*******************************************************************************
 * Basic interface functions for communicating with the MFRC522
 *******************************************************************************/
-
-/*
-
-void PCD_WriteRegister(
-	MFRC522Ptr_t mfrc,
-	uint8_t reg,  ///< The register to write to. One of the PCD_Register enums.
-	uint8_t value ///< The value to write.
-	) {
-	// Set the settings to work with SPI bus
-	Chip_SSP_SetFormat(mfrc->pSSP, SSP_BITS_8, SSP_FRAMEFORMAT_SPI,
-					   SSP_CLOCK_CPHA0_CPOL0);
-	Chip_SSP_SetBitRate(mfrc->pSSP, MFRC522_BIT_RATE);
-	Chip_SSP_Enable(mfrc->pSSP);
-
-	// Select slave
-	Chip_GPIO_SetPinState(LPC_GPIO_PORT, mfrc->_chipSelectPin.port,
-						  mfrc->_chipSelectPin.pin, (bool)false);
-
-	// MSB == 0 is for writing. LSB is not used in address. Datasheet section
-	// 8.1.2.3.
-	// SPI.transfer(reg & 0x7E);
-	mfrc->Tx_Buf[0] = reg & 0x7E;
-	mfrc->data_Setup.rx_cnt = mfrc->data_Setup.tx_cnt = 0;
-	Chip_SSP_RWFrames_Blocking(mfrc->pSSP, &(mfrc->data_Setup));
-
-	// SPI.transfer(value);
-	mfrc->Tx_Buf[0] = value;
-	mfrc->data_Setup.rx_cnt = mfrc->data_Setup.tx_cnt = 0;
-
-	Chip_SSP_RWFrames_Blocking(mfrc->pSSP, &(mfrc->data_Setup));
-	// Release slave again
-	Chip_GPIO_SetPinState(LPC_GPIO_PORT, mfrc->_chipSelectPin.port,
-						  mfrc->_chipSelectPin.pin, (bool) true );
-
-	// Stop using the SPI bus
-	Chip_SSP_Disable(mfrc->pSSP);
-} // End PCD_WriteRegister() 
-*/
 
 /**
  * Writes a uint8_t to the specified register in the MFRC522 chip.
@@ -102,55 +58,6 @@ void PCD_WriteRegister(MFRC522Ptr_t mfrc, uint8_t reg, uint8_t value) {
 	spi_write_blocking(mfrc->spi, msg, 2);
 	cs_deselect(mfrc->_chipSelectPin);
 }
-
-/*
-void reg_write(spi_inst_t *spi, const uint cs, const uint8_t reg, const uint8_t data) {
-    uint8_t msg[2];
-    msg[0] = 0x00 | reg; //First bit defines the mode. MSB = 0 -> write 
-    msg[1] = data;
-
-    cs_select(cs);
-    spi_write_blocking(spi, msg, 2);
-    cs_deselect(cs);
-} */
-
-
-/* void PCD_WriteNRegister(
-	MFRC522Ptr_t mfrc,
-	uint8_t reg,   ///< The register to write to. One of the PCD_Register enums.
-	uint8_t count, ///< The number of uint8_ts to write to the register
-	uint8_t *values ///< The values to write. uint8_t array.
-	) {
-	// Set the settings to work with SPI bus
-	Chip_SSP_SetFormat(mfrc->pSSP, SSP_BITS_8, SSP_FRAMEFORMAT_SPI,
-					   SSP_CLOCK_CPHA0_CPOL0);
-	Chip_SSP_SetBitRate(mfrc->pSSP, MFRC522_BIT_RATE);
-	Chip_SSP_Enable(mfrc->pSSP);
-	Chip_GPIO_SetPinState(LPC_GPIO_PORT, mfrc->_chipSelectPin.port,
-						  mfrc->_chipSelectPin.pin,
-						  (bool)false); // Select slave
-
-	//	SPI.transfer(reg & 0x7E);
-	// MSB == 0 is for writing. LSB is not used in address. Datasheet section
-	// 8.1.2.3.
-	mfrc->Tx_Buf[0] = reg & 0x7E;
-	mfrc->data_Setup.rx_cnt = mfrc->data_Setup.tx_cnt = 0;
-	Chip_SSP_RWFrames_Blocking(mfrc->pSSP, &(mfrc->data_Setup));
-
-	for (uint8_t index = 0; index < count; index++) {
-		// SPI.transfer(values[index]);
-		mfrc->Tx_Buf[0] = values[index];
-		mfrc->data_Setup.rx_cnt = mfrc->data_Setup.tx_cnt = 0;
-		Chip_SSP_RWFrames_Blocking(mfrc->pSSP, &(mfrc->data_Setup));
-	}
-
-	// Release slave again
-	Chip_GPIO_SetPinState(LPC_GPIO_PORT, mfrc->_chipSelectPin.port,
-						  mfrc->_chipSelectPin.pin, (bool)true);
-
-	// Stop using the SPI bus
-	Chip_SSP_Disable(mfrc->pSSP);
-} // End PCD_WriteRegister() */
 
 /**
  * Writes a number of uint8_ts to the specified register in the MFRC522 chip.
@@ -175,44 +82,6 @@ void PCD_WriteNRegister(
 	cs_deselect(mfrc->_chipSelectPin);
 }
 
-/* uint8_t PCD_ReadRegister(
-	MFRC522Ptr_t mfrc,
-	uint8_t reg ///< The register to read from. One of the PCD_Register enums.
-	) {
-	uint8_t value;
-
-	// Set the settings to work with SPI bus
-	Chip_SSP_SetFormat(mfrc->pSSP, SSP_BITS_8, SSP_FRAMEFORMAT_SPI,
-					   SSP_CLOCK_CPHA0_CPOL0);
-	Chip_SSP_SetBitRate(mfrc->pSSP, MFRC522_BIT_RATE);
-	Chip_SSP_Enable(mfrc->pSSP);
-	Chip_GPIO_SetPinState(LPC_GPIO_PORT, mfrc->_chipSelectPin.port,
-						  mfrc->_chipSelectPin.pin,
-						  (bool)false); // Select slave
-
-	// MSB == 1 is for reading. LSB ==0, not used in address. Datasheet section
-	// 8.1.2.3.
-	//	SPI.transfer(0x80 | (reg & 0x7E));
-	mfrc->Tx_Buf[0] = 0x80 | (reg & 0x7E);
-	mfrc->data_Setup.rx_cnt = mfrc->data_Setup.tx_cnt = 0;
-	Chip_SSP_RWFrames_Blocking(mfrc->pSSP, &(mfrc->data_Setup));
-
-	// Read the value back. Send 0 to stop reading.
-	//	value = SPI.transfer(0);
-	mfrc->data_Setup.rx_cnt = mfrc->data_Setup.tx_cnt = 0;
-	mfrc->Tx_Buf[0] = 0x00;
-	Chip_SSP_RWFrames_Blocking(mfrc->pSSP, &(mfrc->data_Setup));
-	value = mfrc->Rx_Buf[0];
-
-	// Release slave again
-	Chip_GPIO_SetPinState(LPC_GPIO_PORT, mfrc->_chipSelectPin.port,
-						  mfrc->_chipSelectPin.pin, (bool)true);
-
-	// Stop using the SPI bus
-	Chip_SSP_Disable(mfrc->pSSP);
-	return value;
-} // End PCD_ReadRegister() */
-
 /**
  * Reads a uint8_t from the specified register in the MFRC522 chip.
  * The interface is described in the datasheet section 8.1.2.
@@ -230,98 +99,6 @@ uint8_t PCD_ReadRegister(
 	cs_deselect(mfrc->_chipSelectPin);
 	return buf;
 }
-
-
-/* void reg_read(spi_inst_t *spi, const uint cs, const uint8_t reg, uint8_t *buf) {
-    const uint8_t msg = 0x80 | reg; //First bit defines the mode. MSB = 1 -> read
-
-    cs_select(cs);
-    spi_write_blocking(spi, &msg, 1);
-    spi_read_blocking(spi, 0, buf, 1);
-    cs_deselect(cs);
-} */
-
-/*
-void PCD_ReadNRegister(
-	MFRC522Ptr_t mfrc,
-	uint8_t reg, ///< The register to read from. One of the PCD_Register enums.
-	uint8_t count,   ///< The number of uint8_ts to read
-	uint8_t *values, ///< uint8_t array to store the values in.
-	uint8_t rxAlign ///< Only bit positions rxAlign..7 in values[0] are updated.
-	) {
-	//		 rxAlign=0;
-	if (count == 0) {
-		return;
-	}
-	// printf(F("Reading "));	printf(count); printf(F(" uint8_ts from
-	// register."));
-	uint8_t address = 0x80 | (reg & 0x7E); // MSB == 1 is for reading. LSB is
-										   // not used in address. Datasheet
-										   // section 8.1.2.3.
-	uint8_t index = 0;					   // Index in values array.
-
-	// Set the settings to work with SPI bus
-	Chip_SSP_SetFormat(mfrc->pSSP, SSP_BITS_8, SSP_FRAMEFORMAT_SPI,
-					   SSP_CLOCK_CPHA0_CPOL0);
-	Chip_SSP_SetBitRate(mfrc->pSSP, MFRC522_BIT_RATE);
-	Chip_SSP_Enable(mfrc->pSSP);
-	Chip_GPIO_SetPinState(LPC_GPIO_PORT, mfrc->_chipSelectPin.port,
-						  mfrc->_chipSelectPin.pin,
-						  (bool)false); // Select slave
-
-	// One read is performed outside of the loop
-	count--;
-
-	// Tell MFRC522 which address we want to read
-	//	SPI.transfer(address);
-	mfrc->Tx_Buf[0] = address;
-	mfrc->data_Setup.rx_cnt = mfrc->data_Setup.tx_cnt = 0;
-	Chip_SSP_RWFrames_Blocking(mfrc->pSSP, &(mfrc->data_Setup));
-
-	while (index < count) {
-		if (index == 0 &&
-			rxAlign) { // Only update bit positions rxAlign..7 in values[0]
-			// Create bit mask for bit positions rxAlign..7
-			uint8_t mask = 0;
-			for (uint8_t i = rxAlign; i <= 7; i++) {
-				mask |= (1 << i);
-			}
-
-			// Read value and tell that we want to read the same address again.
-			//			uint8_t value = SPI.transfer(address);
-			mfrc->Tx_Buf[0] = address;
-			mfrc->data_Setup.rx_cnt = mfrc->data_Setup.tx_cnt = 0;
-			Chip_SSP_RWFrames_Blocking(mfrc->pSSP, &(mfrc->data_Setup));
-			uint8_t value = mfrc->Rx_Buf[0];
-
-			// Apply mask to both current value of values[0] and the new data in
-			// value.
-			values[0] = (values[index] & ~mask) | (value & mask);
-		} else { // Normal case
-			// Read value and tell that we want to read the same address again.
-			//				values[index] = SPI.transfer(address);
-			mfrc->Tx_Buf[0] = address;
-			mfrc->data_Setup.rx_cnt = mfrc->data_Setup.tx_cnt = 0;
-			Chip_SSP_RWFrames_Blocking(mfrc->pSSP, &(mfrc->data_Setup));
-			values[index] = mfrc->Rx_Buf[0];
-		}
-		index++;
-	}
-
-	// Read the final uint8_t. Send 0 to stop reading.
-	//	values[index] = SPI.transfer(0);
-	mfrc->Tx_Buf[0] = 0;
-	mfrc->data_Setup.rx_cnt = mfrc->data_Setup.tx_cnt = 0;
-	Chip_SSP_RWFrames_Blocking(mfrc->pSSP, &(mfrc->data_Setup));
-	values[index] = mfrc->Rx_Buf[0];
-
-	// Release slave again
-	Chip_GPIO_SetPinState(LPC_GPIO_PORT, mfrc->_chipSelectPin.port,
-						  mfrc->_chipSelectPin.pin, (bool)true);
-
-	// Stop using the SPI bus
-	Chip_SSP_Disable(mfrc->pSSP);
-} // End PCD_ReadRegister() */
 
 /**
  * Reads a number of uint8_ts from the specified register in the MFRC522 chip.
@@ -439,45 +216,6 @@ PCD_CalculateCRC(MFRC522Ptr_t mfrc,
  * Initializes the MFRC522 chip.
  */
 void PCD_Init(MFRC522Ptr_t mfrc, spi_inst_t *spi) {
-/* 
-	mfrc->pSSP = pSSP;
-	// Init the SSP interface pins
-	Board_SSP_Init(mfrc->pSSP);
-
-	//Enable the SSP interface
-	Chip_SSP_Init(mfrc->pSSP);
-	Chip_SSP_Set_Mode(mfrc->pSSP, SSP_MODE_MASTER);
-	Chip_SSP_SetFormat(mfrc->pSSP, SSP_BITS_8, SSP_FRAMEFORMAT_SPI,
-					   SSP_CLOCK_CPHA0_CPOL0);
-	Chip_SSP_SetBitRate(mfrc->pSSP, MFRC522_BIT_RATE);
-	Chip_SSP_Enable(mfrc->pSSP);
-
-	// Set the chipSelectPin as digital output, do not select the slave yet
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, mfrc->_chipSelectPin.port,
-							  mfrc->_chipSelectPin.pin);
-	Chip_GPIO_SetPinState(LPC_GPIO_PORT, mfrc->_chipSelectPin.port,
-						  mfrc->_chipSelectPin.pin, (bool)true);
-
-	// Set the resetPowerDownPin as digital output, do not reset or power down.
-	Chip_GPIO_SetPinDIROutput(LPC_GPIO_PORT, mfrc->_resetPowerDownPin.port,
-							  mfrc->_resetPowerDownPin.pin);
-
-	if (Chip_GPIO_GetPinState(LPC_GPIO_PORT, mfrc->_resetPowerDownPin.port,
-							  mfrc->_resetPowerDownPin.pin) ==
-		false) { // The MFRC522 chip is in power down mode.
-		Chip_GPIO_SetPinState(
-			LPC_GPIO_PORT, mfrc->_resetPowerDownPin.port,
-			mfrc->_resetPowerDownPin.pin,
-			(bool)true); // Exit power down mode. This triggers a hard reset.
-		// Section 8.8.2 in the datasheet says the oscillator start-up time is
-		// the start up time of the crystal + 37,74�s. Let us be generous: 50ms.
-		SysTick_Init();
-		delay_ms(50);
-		Board_LED_Toggle(0);
-	} else { // Perform a soft reset
-		PCD_Reset(mfrc);
-	}
- */
 
 	mfrc->spi = spi0;
 	gpio_put(RESET_PIN, 0);
