@@ -1,10 +1,5 @@
 /**
- * mfrc522 library for pi pico c/c++ sdk
- * Rewrite c file for pico here
-*/
-
-/*
-* MFRC522.c - LPCOpen compatible C library to be used with the NXP MFRC522 RFID module
+* mfrc522 library for pi pico c/c++ sdk
 * NOTE: Please also check the comments in MFRC522.h - they provide useful hints
 * and background information.
 */
