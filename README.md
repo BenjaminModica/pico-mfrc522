@@ -1,5 +1,7 @@
-To play around with the mfrc522 rfid ic. 
+Pico C/C++ sdk library for MFRC522.
+
+Tested with this RC522 module: https://www.az-delivery.de/en/products/rfid-set. 
+
+Based on the arduino library for MFRC522 https://github.com/miguelbalboa/rfid. Modified the library by https://github.com/luisfg30/rfid so that it works for the Pico. See those projects for more information. 
 
 Datasheet: https://www.nxp.com/docs/en/data-sheet/MFRC522.pdf
-
-Section 16.1.1 has a self test which is implemented in this project. 
